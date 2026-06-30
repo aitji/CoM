@@ -1,0 +1,29 @@
+{
+    "format_version": 3,
+    "header": {
+        "name": "§6C§fhain§6 O§ff §6M§fining §c(1.1.0)",
+        "description": "Every Single §c§lSERVER SIDE§r file (script) fix chuck\nFor Crop Chain Harvesting + Chain mining Created by §l§c@aitji§r\n | fully write in @stable, no need to update addon, when new minecraft version come out",
+        "uuid": "610c9da6-113b-49ab-9230-77cc5a053453",
+        "version": "1.1.0",
+        "min_engine_version": "1.26.12"
+    },
+    "metadata": {
+        "authors": ["aitji", "pickerth-12"],
+        "product_type": "addon",
+        "license": "CoM Noncommercial License 1.0",
+        "url": "https://github.com/aitji/CoM"
+    },
+    "modules": [{
+        "type": "script",
+        "uuid": "895e6056-fc56-4816-9b6f-fbba55795434",
+        "version": "1.0.0",
+        "entry": "scripts/index.js",
+        "language": "javascript"
+    }],
+    "dependencies": [
+        {
+            "module_name": "@minecraft/server",
+            "version": "2.8.0"
+        }
+    ]
+}

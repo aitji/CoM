@@ -1,0 +1,17 @@
+{
+  "name": "com",
+  "author": {
+    "name": "aitji, pickerth-12",
+    "email": "aitji@duck.com",
+    "url": "https://github.com/aitji/CoM"
+  },
+  "license": "CoM Noncommercial License 1.0",
+  "devDependencies": {
+    "@minecraft/server": "^2.8.0"
+  },
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "node -e \"require('fs').rmSync('scripts', { recursive: true, force: true })\""
+  }
+}
