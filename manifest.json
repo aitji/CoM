@@ -1,8 +1,8 @@
 {
     "format_version": 3,
     "header": {
-        "name": "§6C§fhain§6 O§ff §6M§fining §c(1.1.0)",
-        "description": "Every Single §c§lSERVER SIDE§r file (script) fix chuck\nFor Crop Chain Harvesting + Chain mining Created by §l§c@aitji§r\n | fully write in @stable, no need to update addon, when new minecraft version come out",
+        "name": "§6C§fo§6M §c(1.1.0)",
+        "description": "§6Chain §fof §6Mining§7, allow player to chain mining tree, leaves, ore and crops",
         "uuid": "610c9da6-113b-49ab-9230-77cc5a053453",
         "version": "1.1.0",
         "min_engine_version": "1.26.12"
@@ -24,6 +24,160 @@
         {
             "module_name": "@minecraft/server",
             "version": "2.8.0"
+        }
+    ],
+    "settings": [
+        {
+            "type": "label",
+            "text": "§l§6C§r§lo§6M§r was created by §c@aitji§r (script) and §9@pickerth-12§r (ideas & design).\n§7Customize the addon below to match your playstyle.\n\n§mChanging settings in-game requires §l§4/reload§r§m or §l§4rejoining the world§r§m to restart the script runtime. This improves performance."
+        },
+        {
+            "type": "toggle",
+            "text": "§fRequire sneaking §7for chain mining §q(Recommended)",
+            "name": "com:require_sneak",
+            "default": true
+        },
+        {
+            "type": "dropdown",
+            "text": "§fCrop replanting",
+            "name": "com:replant",
+            "options": [
+                {
+                    "name": "free",
+                    "text": "Free §7Automatically replants crops"
+                },
+                {
+                    "name": "paid",
+                    "text": "Paid §7Replanting with harvested crops"
+                }
+            ],
+            "default": "paid"
+        },
+        {
+            "type": "dropdown",
+            "text": "§fMining performance",
+            "name": "com:performance",
+            "options": [
+                {
+                    "name": "4",
+                    "text": "4 blocks/tick §7Best TPS"
+                },
+                {
+                    "name": "8",
+                    "text": "8 blocks/tick §7Recommended"
+                },
+                {
+                    "name": "16",
+                    "text": "16 blocks/tick §7Fastest, §mmay reduce TPS"
+                }
+            ],
+            "default": "8"
+        },
+        {
+            "type": "dropdown",
+            "text": "§fTool durability",
+            "name": "com:durability",
+            "options": [
+                {
+                    "name": "none",
+                    "text": "None §7No durability loss"
+                },
+                {
+                    "name": "vanilla",
+                    "text": "Vanilla"
+                },
+                {
+                    "name": "disabled",
+                    "text": "Disabled §7ignores durability"
+                }
+            ],
+            "default": "vanilla"
+        },
+        {
+            "type": "toggle",
+            "text": "§fConsume hunger §7during chain mining",
+            "name": "com:hunger",
+            "default": true
+        },
+        {
+            "type": "toggle",
+            "text": "§fAutomatically clear leaves §7after felling trees §c(can affect performance)",
+            "name": "com:auto_leaf_clear",
+            "default": false
+        },
+
+
+
+        {
+            "type": "dropdown",
+            "text": "§fMaximum ore vein",
+            "name": "com:ore_limit",
+            "options": [
+                {
+                    "name": "16",
+                    "text": "16 ore §qBest TPS"
+                },
+                {
+                    "name": "32",
+                    "text": "32 ore §7Recommended"
+                },
+                {
+                    "name": "64",
+                    "text": "64 ore §mMay reduce TPS"
+                }
+            ],
+            "default": "32"
+        },
+        {
+            "type": "dropdown",
+            "text": "§fMaximum tree size",
+            "name": "com:tree_limit",
+            "options": [
+                {
+                    "name": "64",
+                    "text": "64 logs §qBest TPS"
+                },
+                {
+                    "name": "256",
+                    "text": "256 logs §7Recommended"
+                },
+                {
+                    "name": "512",
+                    "text": "512 logs §mMay reduce TPS"
+                }
+            ],
+            "default": "256"
+        },
+        {
+            "type": "dropdown",
+            "text": "§fMaximum crop chain",
+            "name": "com:crop_limit",
+            "options": [
+                {
+                    "name": "64",
+                    "text": "64 crops §qBest TPS"
+                },
+                {
+                    "name": "128",
+                    "text": "128 crops §7Recommended"
+                },
+                {
+                    "name": "256",
+                    "text": "256 crops §mMay reduce TPS"
+                }
+            ],
+            "default": "128"
+        },
+
+        {
+            "type": "label",
+            "text": "§l§6C§r§lo§6M§r's developer settings §7----------------------------------"
+        },
+        {
+            "type": "toggle",
+            "text": "§cDebug mode? §7(Show spam logs in chat/console) §r",
+            "name": "com:DEBUG",
+            "default": true
         }
     ]
 }
