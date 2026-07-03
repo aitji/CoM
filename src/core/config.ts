@@ -1,7 +1,8 @@
 import { world } from "@minecraft/server"
 
 export type ReplantMode = "free" | "paid"
-export type DurabilityMode = "none" | "vanilla" | "disabled"
+export type DurabilityMode = "none" | "vanilla" | "always"
+export type CropDurabilityMode = DurabilityMode
 
 export interface Config {
   rePlant: boolean
@@ -14,6 +15,7 @@ export interface Config {
   performance: { blocksPerTick: number }
   durability: {
     mode: DurabilityMode
+    cropMode: CropDurabilityMode
     oreVein: boolean
     treeFell: boolean
     leafClear: boolean
@@ -60,6 +62,10 @@ function getInt(name: string, fallback: number): number {
 
 function buildConfig(): Readonly<Config> {
   const durabilityMode = getStr("com:durability", "vanilla") as DurabilityMode
+  const cropDurabilityMode = getStr(
+    "com:durability_crop",
+    durabilityMode === "always" ? "always" : "vanilla"
+  ) as CropDurabilityMode
   const rePlantMode = getStr("com:replant", "paid") as ReplantMode
 
   return Object.freeze({
@@ -75,8 +81,9 @@ function buildConfig(): Readonly<Config> {
     }),
     durability: Object.freeze({
       mode: durabilityMode,
-      oreVein: durabilityMode === "vanilla",
-      treeFell: durabilityMode === "vanilla",
+      cropMode: cropDurabilityMode,
+      oreVein: durabilityMode !== "none",
+      treeFell: durabilityMode !== "none",
       leafClear: false,
     }),
     leafClear: Object.freeze({

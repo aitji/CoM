@@ -66,7 +66,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
 
   // tree
   const logId = stripNs(brokenId)
-  if (LOG_SUFFIXES.has(logId) && tool?.typeId.endsWith("_axe")) {
+  if (LOG_SUFFIXES.has(logId) && tool?.hasTag("is_axe")) {
     const logs = bfsCollect(block, (b) => b.typeId === brokenId, CONFIG.maxTreeLogs, true)
     if (logs.length === 0) return
 
@@ -106,7 +106,11 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
   // crop
   const cropKey = stripNs(brokenId)
   const crop = CROP_DATA.get(cropKey)
-  if (crop && tool?.typeId.endsWith("_hoe")) {
+  if (crop && (
+    tool?.hasTag('is_hoe') ||
+    tool?.hasTag('is_sword') ||
+    tool?.hasTag('is_axe')
+  )) {
     if (crop.maturity !== "none") {
       const stage = brokenBlockPermutation.getState(crop.maturity)
       if (typeof stage !== "number" || crop.maturityStage === undefined || stage < crop.maturityStage) return
@@ -133,7 +137,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
       cropBlocks, crop,
       player, dropPos,
       lib.buildOpt(
-        CONFIG.durability.mode === "vanilla" && Boolean(crop.costsDurability),
+        CONFIG.durability.cropMode === "always" || (CONFIG.durability.cropMode === "vanilla" && Boolean(crop.costsDurability)),
         true
       ),
       CONFIG.rePlant, CONFIG.rePlantMode

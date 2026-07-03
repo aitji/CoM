@@ -95,6 +95,16 @@ class DropAccumulator {
     this.counts.set(id, (this.counts.get(id) ?? 0) + amount)
   }
 
+  remove(id: string, amount = 1): boolean {
+    if (amount <= 0) return true
+    const current = this.counts.get(id) ?? 0
+    if (current < amount) return false
+    const next = current - amount
+    if (next > 0) this.counts.set(id, next)
+    else this.counts.delete(id)
+    return true
+  }
+
   flush(dim: Dimension, pos: Vector3): void {
     for (const [id, total] of this.counts) {
       let remaining = total
@@ -286,19 +296,23 @@ export function* cropHarvestJob(
         ? block.permutation.withState(crop.maturity, 0)
         : undefined
 
-      const shouldReplant = Boolean(
-        replant &&
-        crop.canReplace &&
-        crop.seedItem &&
-        (replantMode === "free" || consumeSeed(player, block.dimension, block.center(), crop.seedItem))
-      )
-
       if (!creative) {
         for (const [dropId, drop] of Object.entries(crop.drops)) {
           const count = getCropDropCount(drop, enchants.fortune, crop.fortune)
           drops.add(`minecraft:${dropId}`, count)
         }
       }
+
+      const seedId = crop.seedItem?.includes(":") ? crop.seedItem : `minecraft:${crop.seedItem}`
+      const shouldReplant = Boolean(
+        replant &&
+        crop.canReplace &&
+        seedId && (
+          replantMode === "free" ||
+          consumeSeed(player, block.dimension, block.center(), seedId) ||
+          drops.remove(seedId)
+        )
+      )
 
       try { block.setType("minecraft:air") }
       catch { continue }

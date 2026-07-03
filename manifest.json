@@ -80,15 +80,35 @@
             "options": [
                 {
                     "name": "none",
-                    "text": "None §7No durability loss"
+                    "text": "None §7No durability loss §8by chain mining"
                 },
                 {
                     "name": "vanilla",
-                    "text": "Vanilla"
+                    "text": "Vanilla §7Use vanilla durability loss"
                 },
                 {
-                    "name": "disabled",
-                    "text": "Disabled §7ignores durability"
+                    "name": "always",
+                    "text": "Always §7consume tool durability"
+                }
+            ],
+            "default": "vanilla"
+        },
+        {
+            "type": "dropdown",
+            "text": "§fCrop tool durability",
+            "name": "com:durability_crop",
+            "options": [
+                {
+                    "name": "none",
+                    "text": "None §7No durability loss from crops"
+                },
+                {
+                    "name": "vanilla",
+                    "text": "Vanilla §7Only crops that normally cost durability will consume it"
+                },
+                {
+                    "name": "always",
+                    "text": "Always §7All crops consume tool durability"
                 }
             ],
             "default": "vanilla"
