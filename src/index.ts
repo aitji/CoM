@@ -15,9 +15,18 @@ import {
   clearExhaustionCache
 } from "./addon/hunger"
 import * as lib from "./lib"
+import * as cache from "./core/cache"
 
 // routers
-world.afterEvents.playerLeave.subscribe(({ playerId }) => clearExhaustionCache(playerId))
+world.afterEvents.playerGameModeChange.subscribe((data) => cache.player_gamemode_update(data))
+world.afterEvents.playerLeave.subscribe((data) => {
+  cache.player_track_stop(data)
+  clearExhaustionCache(data.playerId)
+})
+world.afterEvents.playerSpawn.subscribe((data) => cache.player_track_start(data))
+world.afterEvents.gameRuleChange.subscribe((data) => cache.gamerule_update(data))
+
+// routes mining
 world.afterEvents.playerBreakBlock.subscribe((event) => {
   const { player, block, brokenBlockPermutation } = event
 
@@ -31,7 +40,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
   const oreKey = stripOreId(brokenId)
   const ore = ORE_DATA.get(oreKey)
   if (ore) {
-    if(player.getGameMode() !== GameMode.Creative){
+    if (player.getGameMode() !== GameMode.Creative) {
       const toolTier = tool ? (PICKAXE_TIERS.get(tool.typeId) ?? 0) : 0
       if (toolTier < ore.tier) return
     }
