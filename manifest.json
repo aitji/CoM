@@ -2,7 +2,7 @@
     "format_version": 3,
     "header": {
         "name": "§6C§fo§6M §c(1.1.0)",
-        "description": "§6Chain §fof §6Mining§7, allow player to chain mining tree, leaves, ore and crops",
+        "description": "§6Chain §fo' §6Mining§7, allow player to chain mining tree, leaves, ore and crops",
         "uuid": "610c9da6-113b-49ab-9230-77cc5a053453",
         "version": "1.1.0",
         "min_engine_version": "1.26.12"

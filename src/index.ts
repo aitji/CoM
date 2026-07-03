@@ -1,4 +1,4 @@
-import { GameMode, ItemComponentTypes, system, world } from "@minecraft/server"
+import { Block, GameMode, ItemComponentTypes, system, world } from "@minecraft/server"
 import {
   CONFIG, CROP_DATA,
   LEAF_TYPES, LOG_SUFFIXES,
@@ -116,16 +116,20 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
       if (typeof stage !== "number" || crop.maturityStage === undefined || stage < crop.maturityStage) return
     }
 
+    const isHarvestableCrop = (b: Block): boolean => {
+      const currentCrop = CROP_DATA.get(stripNs(b.typeId))
+      if (!currentCrop) return false
+      if (currentCrop.maturity === "none") return true
+      const stage = b.permutation.getState(currentCrop.maturity)
+      return typeof stage === "number" && currentCrop.maturityStage !== undefined && stage >= currentCrop.maturityStage
+    }
+
     const cropBlocks = bfsCollect(
       block,
-      (b) => {
-        if (b.typeId !== brokenId) return false
-        if (crop.maturity === "none") return true
-        const stage = b.permutation.getState(crop.maturity)
-        return typeof stage === "number" && crop.maturityStage !== undefined && stage >= crop.maturityStage
-      },
+      isHarvestableCrop,
       CONFIG.maxCropChain,
       false,
+      (b) => isHarvestableCrop(b) || b.typeId.endsWith("_stem"),
     )
 
     if (

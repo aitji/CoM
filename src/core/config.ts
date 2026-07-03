@@ -202,7 +202,7 @@ export interface CropEntry {
   leaveBottom?: true
   leaveTop?: true
   costsDurability?: true
-  drops: Record<string, DropEntry>
+  drops?: Record<string, DropEntry>
 }
 
 export const CROP_DATA: ReadonlyMap<string, CropEntry> = new Map<string, CropEntry>([
@@ -217,6 +217,16 @@ export const CROP_DATA: ReadonlyMap<string, CropEntry> = new Map<string, CropEnt
   ["reeds", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", leaveBottom: true, drops: { sugar_cane: { min: 1, max: 1 } } }],
   ["cactus", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", costsDurability: true, leaveBottom: true, drops: { cactus: { min: 1, max: 1 } } }],
   ["nether_wart", { fortune: true, silkTouch: false, canReplace: true, maturity: "age", maturityStage: 3, seedItem: "minecraft:nether_wart", drops: { nether_wart: { min: 2, max: 4, fortuneCap: 7 } } }],
-  ["pointed_dripstone", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", leaveTop: true, drops: { pointed_dripstone: { min: 1, max: 1 } } }],
-  ["sulfur_spike", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", leaveTop: true, drops: { sulfur_spike: { min: 1, max: 1 } } }],
+
+  ["mangrove_roots", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", maturityStage: 3, seedItem: "minecraft:mangrove_roots", drops: { mangrove_roots: { min: 1, max: 1 } } }],
+  ["nether_wart_block", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", seedItem: "minecraft:nether_wart_block", drops: { nether_wart_block: { min: 1, max: 1 } } }],
+  ["warped_wart_block", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", seedItem: "minecraft:warped_wart_block", drops: { warped_wart_block: { min: 1, max: 1 } } }],
+  ["shroomlight", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", seedItem: "minecraft:shroomlight", drops: { shroomlight: { min: 1, max: 1 } } }],
+
+  ["red_mushroom_block", { fortune: true, silkTouch: true, canReplace: false, maturity: "none", seedItem: "minecraft:red_mushroom_block", drops: { red_mushroom: { min: 0, max: 2 } } }],
+  ["brown_mushroom_block", { fortune: true, silkTouch: true, canReplace: false, maturity: "none", seedItem: "minecraft:brown_mushroom_block", drops: { brown_mushroom: { min: 0, max: 2 } } }],
+  ["mushroom_stem", { fortune: false, silkTouch: true, canReplace: false, maturity: "none", seedItem: "minecraft:mushroom_stem" }],
+  // plan not yet implemented:
+  // ["pointed_dripstone", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", leaveTop: true, drops: { pointed_dripstone: { min: 1, max: 1 } } }],
+  // ["sulfur_spike", { fortune: false, silkTouch: false, canReplace: false, maturity: "none", leaveTop: true, drops: { sulfur_spike: { min: 1, max: 1 } } }],
 ])

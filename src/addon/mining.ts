@@ -6,7 +6,7 @@ import {
   ItemComponentTypes, ItemStack,
   Player, Vector3
 } from "@minecraft/server"
-import { CropEntry, DropEntry, OreEntry } from "../core/config"
+import { CropEntry, CROP_DATA, DropEntry, OreEntry } from "../core/config"
 import { computeOreDrop, randInt, rollCropFortune, rollXP, durabilityCheck } from "./drops"
 import { applyMiningExhaustion } from "./hunger"
 
@@ -52,12 +52,14 @@ const getNbr = (block: Block, dirs: ReadonlyArray<readonly [number, number, numb
 export function bfsCollect(
   start: Block, predicate: (b: Block) => boolean,
   maxBlocks: number, use26 = false,
+  traversePredicate?: (b: Block) => boolean,
 ): Block[] {
   const found: Block[] = []
   const visited = new Set<string>([posKey(start)])
   const queue: Block[] = [start]
   const dirs = use26 ? DIRS_26 : DIRS_6
   let head = 0
+  const canTraverse = traversePredicate ?? predicate
 
   while (head < queue.length && found.length < maxBlocks) {
     const current = queue[head++]
@@ -68,9 +70,11 @@ export function bfsCollect(
       if (visited.has(key)) continue
       visited.add(key)
 
-      if (!predicate(nb)) continue
-      found.push(nb)
-      if (found.length >= maxBlocks) break
+      if (!canTraverse(nb)) continue
+      if (predicate(nb)) {
+        found.push(nb)
+        if (found.length >= maxBlocks) break
+      }
       queue.push(nb)
     }
   }
@@ -176,12 +180,12 @@ export function consumeSeed(player: Player, dimension: Dimension, location: Vect
   return false
 }
 
-function filterKeepers(blocks: Block[], leaveBottom?: true, leaveTop?: true): Block[] {
-  if (!leaveBottom && !leaveTop) return blocks
+function filterKeepers(blocks: Block[]): Block[] {
+  if (blocks.length === 0) return blocks
 
   const columns = new Map<string, { bottom: Block; top: Block }>()
   for (const block of blocks) {
-    const key = `${block.x},${block.z}`
+    const key = `${block.typeId}:${block.x},${block.z}`
     const existing = columns.get(key)
     if (!existing) {
       columns.set(key, { bottom: block, top: block })
@@ -193,10 +197,12 @@ function filterKeepers(blocks: Block[], leaveBottom?: true, leaveTop?: true): Bl
   }
 
   return blocks.filter((block) => {
-    const column = columns.get(`${block.x},${block.z}`)
+    const crop = CROP_DATA.get(stripNs(block.typeId))
+    if (!crop) return true
+    const column = columns.get(`${block.typeId}:${block.x},${block.z}`)
     if (!column) return true
-    if (leaveBottom && block === column.bottom) return false
-    if (leaveTop && block === column.top) return false
+    if (crop.leaveBottom && block === column.bottom) return false
+    if (crop.leaveTop && block === column.top) return false
     return true
   })
 }
@@ -288,25 +294,37 @@ export function* cropHarvestJob(
   const enchants = getEnchants(getMainhand(player))
   const drops = new DropAccumulator()
   let broken = 0
-  const harvestBlocks = filterKeepers(blocks, crop.leaveBottom, crop.leaveTop)
+  const harvestBlocks = filterKeepers(blocks)
 
   try {
     for (const block of harvestBlocks) {
-      const seedPermutation = crop.canReplace && crop.maturity !== "none"
-        ? block.permutation.withState(crop.maturity, 0)
+      const currentCrop = CROP_DATA.get(stripNs(block.typeId))
+      if (!currentCrop) continue
+
+      const seedPermutation = currentCrop.canReplace && currentCrop.maturity !== "none"
+        ? (() => {
+          try {
+            return block.permutation.withState(currentCrop.maturity, 0)
+          } catch {
+            return undefined
+          }
+        })()
         : undefined
 
       if (!creative) {
-        for (const [dropId, drop] of Object.entries(crop.drops)) {
-          const count = getCropDropCount(drop, enchants.fortune, crop.fortune)
-          drops.add(`minecraft:${dropId}`, count)
+        if (enchants.silkTouch && crop.silkTouch) drops.add(block.typeId, 1)
+        else if (currentCrop.drops) {
+          for (const [dropId, drop] of Object.entries(currentCrop.drops)) {
+            const count = getCropDropCount(drop, enchants.fortune, currentCrop.fortune)
+            drops.add(`minecraft:${dropId}`, count)
+          }
         }
       }
 
-      const seedId = crop.seedItem?.includes(":") ? crop.seedItem : `minecraft:${crop.seedItem}`
+      const seedId = currentCrop.seedItem?.includes(":") ? currentCrop.seedItem : `minecraft:${currentCrop.seedItem}`
       const shouldReplant = Boolean(
         replant &&
-        crop.canReplace &&
+        currentCrop.canReplace &&
         seedId && (
           replantMode === "free" ||
           consumeSeed(player, block.dimension, block.center(), seedId) ||
