@@ -4,7 +4,7 @@ import { resolve } from "path"
 const isRP = process.argv.includes("--rp")
 const prefix = isRP ? 'qofrp' : 'qof'
 
-if (!isRP) {
+/*if (!isRP) {
   const configPath = resolve("src/_config.ts")
   if (!existsSync(configPath)) {
     console.error(`File not found: ${configPath}`)
@@ -16,7 +16,7 @@ if (!isRP) {
     writeFileSync(configPath, updatedConfig)
     console.log("Set DEBUG: false in _config.js")
   }
-}
+}*/
 
 // update manifest.json (both BP & RP)
 const manifestPath = resolve("manifest.json")
