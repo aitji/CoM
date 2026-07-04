@@ -5,7 +5,7 @@ import { consumeSeed, JobOptions } from "./addon/mining"
 export const buildOpt = (costsDurability: boolean, costsHunger: boolean): JobOptions => {
     return {
         costsDurability,
-        costsHunger: CONFIG.hunger.enabled && costsHunger,
+        costsHunger: costsHunger && CONFIG.hunger.mode !== "none",
         exhaustionPerBlock: CONFIG.hunger.exhaustionPerBlock,
         blocksPerTick: Math.max(1, CONFIG.performance.blocksPerTick),
     }

@@ -4,7 +4,10 @@ export type ReplantMode = "free" | "paid"
 export type DurabilityMode = "none" | "vanilla" | "always"
 export type CropDurabilityMode = DurabilityMode
 
+export type HungerMode = "none" | "vanilla" | "exhaustion"
+
 export interface Config {
+  debug: boolean
   rePlant: boolean
   rePlantMode: ReplantMode
   requireSneak: boolean
@@ -22,7 +25,7 @@ export interface Config {
   }
   leafClear: { autoClearOnTreeFell: boolean }
   hunger: {
-    enabled: boolean
+    mode: HungerMode
     exhaustionPerBlock: number
     oreVein: boolean
     treeFell: boolean
@@ -72,9 +75,10 @@ function buildConfig(): Readonly<Config> {
     rePlant: getBool("com:replant_enabled", true),
     rePlantMode,
     requireSneak: getBool("com:require_sneak", true),
+    debug: getBool("com:debug", false),
     maxOreVein: getInt("com:ore_limit", 32),
     maxTreeLogs: getInt("com:tree_limit", 256),
-    maxLeaves: 128,
+    maxLeaves: getInt("com:leaf_limit", 128),
     maxCropChain: getInt("com:crop_limit", 64),
     performance: Object.freeze({
       blocksPerTick: getInt("com:performance", 8)
@@ -84,17 +88,20 @@ function buildConfig(): Readonly<Config> {
       cropMode: cropDurabilityMode,
       oreVein: durabilityMode !== "none",
       treeFell: durabilityMode !== "none",
-      leafClear: false,
+      leafClear: durabilityMode !== "none",
     }),
     leafClear: Object.freeze({
       autoClearOnTreeFell: getBool("com:auto_leaf_clear", false)
     }),
     hunger: Object.freeze({
-      enabled: getBool("com:hunger", true),
-      exhaustionPerBlock: 0.005,
+      mode: getStr("com:hunger_mode", "exhaustion") as HungerMode,
+      exhaustionPerBlock: (() => {
+        const mode = getStr("com:hunger_mode", "exhaustion") as HungerMode
+        return mode === "vanilla" ? 0.005 : mode === "exhaustion" ? 0.1 : 0
+      })(),
       oreVein: true,
       treeFell: true,
-      leafClear: false,
+      leafClear: true,
     })
   }) as Readonly<Config>
 }

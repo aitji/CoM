@@ -8,6 +8,7 @@
   "license": "CoM Noncommercial License 1.0",
   "devDependencies": {
     "@minecraft/server": "^2.8.0",
+    "@types/node": "^26.1.0",
     "typescript": "^6.0.3"
   },
   "scripts": {

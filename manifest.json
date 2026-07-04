@@ -29,7 +29,7 @@
     "settings": [
         {
             "type": "label",
-            "text": "§l§6C§r§lo§6M§r was created by §c@aitji§r (script) and §9@pickerth-12§r (ideas & design).\n§7Customize the addon below to match your playstyle.\n\n§mChanging settings in-game requires §l§4/reload§r§m or §l§4rejoining the world§r§m to restart the script runtime. This improves performance."
+            "text": "§l§6C§r§lo§6M§r was created by §c@aitji§r (script) and §9@pickerth-12§r (ideas & design).\n§7Customize the addon below to match your playstyle.\n\n§mChanging settings in-game requires §l§4/reload§r§m or §l§4rejoining§r§m to restart the script runtime. This improves performance."
         },
         {
             "type": "toggle",
@@ -39,28 +39,32 @@
         },
         {
             "type": "dropdown",
-            "text": "§fCrop replanting",
-            "name": "com:replant",
+            "text": "§fHunger exhaustion mode",
+            "name": "com:hunger_mode",
             "options": [
                 {
-                    "name": "free",
-                    "text": "Free §7Automatically replants crops"
+                    "name": "none",
+                    "text": "None§7 no exhaustion will be applied"
                 },
                 {
-                    "name": "paid",
-                    "text": "Paid §7Replanting with harvested crops"
+                    "name": "vanilla",
+                    "text": "Vanilla§7 vanilla exhaustion"
+                },
+                {
+                    "name": "exhaustion",
+                    "text": "Exhaustion§7 weighted exhaustion §q(Recommended)"
                 }
             ],
-            "default": "paid"
+            "default": "exhaustion"
         },
         {
             "type": "dropdown",
-            "text": "§fMining performance",
+            "text": "§fChain mining speed §7(can affect performance)",
             "name": "com:performance",
             "options": [
                 {
                     "name": "4",
-                    "text": "4 blocks/tick §7Best TPS"
+                    "text": "4 blocks/tick §qBest performance"
                 },
                 {
                     "name": "8",
@@ -68,10 +72,33 @@
                 },
                 {
                     "name": "16",
-                    "text": "16 blocks/tick §7Fastest, §mmay reduce TPS"
+                    "text": "16 blocks/tick §7Fastest, §mmay reduce performance"
                 }
             ],
             "default": "8"
+        },
+
+
+
+        {
+            "type": "label",
+            "text": "§l§6C§r§lo§6M§r's Gameplay Settings §7-----------------------------------"
+        },
+        {
+            "type": "dropdown",
+            "text": "§fCrop replanting",
+            "name": "com:replant",
+            "options": [
+                {
+                    "name": "free",
+                    "text": "Infinite §7Automatically replants crops §o§pwithout consuming crops"
+                },
+                {
+                    "name": "paid",
+                    "text": "Consume crops §7Replants using harvested crops"
+                }
+            ],
+            "default": "paid"
         },
         {
             "type": "dropdown",
@@ -115,13 +142,7 @@
         },
         {
             "type": "toggle",
-            "text": "§fConsume hunger §7during chain mining",
-            "name": "com:hunger",
-            "default": true
-        },
-        {
-            "type": "toggle",
-            "text": "§fAutomatically clear leaves §7after felling trees §c(can affect performance)",
+            "text": "§fAutomatically clear leaves §7after felling trees §c(May reduce performance)",
             "name": "com:auto_leaf_clear",
             "default": false
         },
@@ -129,13 +150,17 @@
 
 
         {
+            "type": "label",
+            "text": "§l§6C§r§lo§6M§r's Limits Settings §7-------------------------------------"
+        },
+        {
             "type": "dropdown",
-            "text": "§fMaximum ore vein",
+            "text": "§fMaximum ore chain",
             "name": "com:ore_limit",
             "options": [
                 {
                     "name": "16",
-                    "text": "16 ore §qBest TPS"
+                    "text": "16 ore §qBest performance"
                 },
                 {
                     "name": "32",
@@ -143,7 +168,7 @@
                 },
                 {
                     "name": "64",
-                    "text": "64 ore §mMay reduce TPS"
+                    "text": "64 ore §mMay reduce performance"
                 }
             ],
             "default": "32"
@@ -155,7 +180,11 @@
             "options": [
                 {
                     "name": "64",
-                    "text": "64 logs §qBest TPS"
+                    "text": "64 logs §qBest performance"
+                },
+                {
+                    "name": "128",
+                    "text": "128 logs §pperformance"
                 },
                 {
                     "name": "256",
@@ -163,31 +192,61 @@
                 },
                 {
                     "name": "512",
-                    "text": "512 logs §mMay reduce TPS"
+                    "text": "512 logs §mMay reduce performance"
                 }
             ],
             "default": "256"
         },
         {
             "type": "dropdown",
-            "text": "§fMaximum crop chain",
+            "text": "§fMaximum leaf size",
+            "name": "com:leaf_limit",
+            "options": [
+                {
+                    "name": "64",
+                    "text": "64 leaves §qBest performance"
+                },
+                {
+                    "name": "128",
+                    "text": "128 leaves §pperformance"
+                },
+                {
+                    "name": "256",
+                    "text": "256 leaves §7Recommended"
+                },
+                {
+                    "name": "512",
+                    "text": "512 leaves §mMay reduce performance"
+                }
+            ],
+            "default": "256"
+        },
+        {
+            "type": "dropdown",
+            "text": "§fMaximum chain harvest",
             "name": "com:crop_limit",
             "options": [
                 {
                     "name": "64",
-                    "text": "64 crops §qBest TPS"
+                    "text": "64 crops §qBest performance"
                 },
                 {
                     "name": "128",
-                    "text": "128 crops §7Recommended"
+                    "text": "128 crops §pperformance"
                 },
                 {
                     "name": "256",
-                    "text": "256 crops §mMay reduce TPS"
+                    "text": "256 crops §7Recommended"
+                },
+                {
+                    "name": "512",
+                    "text": "512 crops §mMay reduce performance"
                 }
             ],
             "default": "128"
         },
+
+
 
         {
             "type": "label",
@@ -195,7 +254,7 @@
         },
         {
             "type": "toggle",
-            "text": "§cDebug mode? §7(Show spam logs in chat/console) §r",
+            "text": "§cDebug mode? §7(If you have a problem, turn this on while recording) §r",
             "name": "com:DEBUG",
             "default": true
         }
