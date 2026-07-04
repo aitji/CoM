@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "fs"
 import { resolve } from "path"
 
 const isRP = process.argv.includes("--rp")
-const prefix = isRP ? 'qofrp' : 'qof'
+const prefix = isRP ? 'comrp' : 'com'
 
 /*if (!isRP) {
   const configPath = resolve("src/_config.ts")
@@ -37,5 +37,5 @@ for (const s of manifest.settings || []) {
 
 if (changed) {
   writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
-  console.log("Set qof:DEBUG default to false in manifest.json")
-} else console.log("qof:DEBUG already false or not found")
+  console.log("Set com:DEBUG default to false in manifest.json")
+} else console.log("com:DEBUG already false or not found")

@@ -9,7 +9,7 @@ const [oldBig, oldUp, oldPatch] = oldVersion
 const [newBig, newUp, newPatch] = newVersion
 
 const versionString = newVersion.join(".")
-const packName = `QoF-${versionString}.mcaddon`
+const packName = `CoM-${versionString}.mcaddon`
 
 let releaseType = ""
 

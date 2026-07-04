@@ -52,7 +52,7 @@ jobs:
             RELEASE_TYPE="prerelease"
           fi
 
-          PACK_NAME="QoF-${VERSION}.mcpack"
+          PACK_NAME="CoM-${VERSION}.mcpack"
 
           echo "version_string=${VERSION}" >> $GITHUB_OUTPUT
           echo "pack_name=${PACK_NAME}" >> $GITHUB_OUTPUT
@@ -134,7 +134,7 @@ jobs:
       - name: Zip behavior_packs mcpack
         if: steps.resolve.outputs.changed == 'true'
         run: |
-          BP_PACK="QoF_v${{ steps.resolve.outputs.version_string }}_behavior_packs.mcpack"
+          BP_PACK="CoM_v${{ steps.resolve.outputs.version_string }}_behavior_packs.mcpack"
 
           {
             grep -v '^\s*#' build.gitignore | grep -v '^\s*$' | grep '^\!' | sed 's/^!/+ /'
@@ -162,7 +162,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "v${{ steps.resolve.outputs.version_string }}"
-          name: "QoF v${{ steps.resolve.outputs.version_string }}"
+          name: "CoM v${{ steps.resolve.outputs.version_string }}"
           prerelease: ${{ steps.resolve.outputs.release_type == 'prerelease' }}
           files: ${{ steps.resolve.outputs.pack_name }}
           body_path: /tmp/changelogs_body.md
@@ -174,7 +174,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "v${{ steps.resolve.outputs.version_string }}"
-          name: "QoF v${{ steps.resolve.outputs.version_string }}"
+          name: "CoM v${{ steps.resolve.outputs.version_string }}"
           prerelease: ${{ steps.resolve.outputs.release_type == 'prerelease' }}
           files: ${{ steps.resolve.outputs.pack_name }}
           generate_release_notes: true
