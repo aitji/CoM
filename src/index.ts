@@ -124,12 +124,18 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
       return typeof stage === "number" && currentCrop.maturityStage !== undefined && stage >= currentCrop.maturityStage
     }
 
+    const isTraversableCrop = (b: Block): boolean => {
+      const currentCrop = CROP_DATA.get(stripNs(b.typeId))
+      if (!currentCrop) return false
+      return stripNs(b.typeId) === cropKey
+    }
+
     const cropBlocks = bfsCollect(
       block,
       isHarvestableCrop,
       CONFIG.maxCropChain,
       CONFIG.search.mode,
-      (b) => isHarvestableCrop(b) || b.typeId.endsWith("_stem"),
+      (b) => isHarvestableCrop(b) || isTraversableCrop(b) || b.typeId.endsWith("_stem"),
     )
 
     if (
