@@ -75,7 +75,26 @@
             ],
             "default": "8"
         },
-
+        {
+            "type": "dropdown",
+            "text": "§fBlock search style §7(can affect performance)",
+            "name": "com:block_search",
+            "options": [
+                {
+                    "name": "classic",
+                    "text": "Classic §7directly adjacent blocks §q(Best performance)"
+                },
+                {
+                    "name": "around",
+                    "text": "Around §7nearby blocks all directions (Recommended)"
+                },
+                {
+                    "name": "aggressive",
+                    "text": "Aggressive §7wider 3D §m(May reduce performance)"
+                }
+            ],
+            "default": "around"
+        },
 
 
         {

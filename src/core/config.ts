@@ -3,6 +3,7 @@ import { world } from "@minecraft/server"
 export type ReplantMode = "free" | "paid"
 export type DurabilityMode = "none" | "vanilla" | "always"
 export type CropDurabilityMode = DurabilityMode
+export type SearchMode = "classic" | "around" | "aggressive"
 
 export type HungerMode = "none" | "vanilla" | "exhaustion"
 
@@ -16,6 +17,7 @@ export interface Config {
   maxLeaves: number
   maxCropChain: number
   performance: { blocksPerTick: number }
+  search: { mode: SearchMode }
   durability: {
     mode: DurabilityMode
     cropMode: CropDurabilityMode
@@ -70,6 +72,7 @@ function buildConfig(): Readonly<Config> {
     durabilityMode === "always" ? "always" : "vanilla"
   ) as CropDurabilityMode
   const rePlantMode = getStr("com:replant", "paid") as ReplantMode
+  const searchMode = getStr("com:block_search", "around") as SearchMode
 
   return Object.freeze({
     rePlant: getBool("com:replant_enabled", true),
@@ -82,6 +85,9 @@ function buildConfig(): Readonly<Config> {
     maxCropChain: getInt("com:crop_limit", 64),
     performance: Object.freeze({
       blocksPerTick: getInt("com:performance", 8)
+    }),
+    search: Object.freeze({
+      mode: searchMode
     }),
     durability: Object.freeze({
       mode: durabilityMode,

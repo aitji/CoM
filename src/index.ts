@@ -50,7 +50,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
       `minecraft:lit_${oreKey}`, `minecraft:lit_deepslate_${oreKey}`
     ])
 
-    const vein = bfsCollect(block, (b) => matchIds.has(b.typeId), CONFIG.maxOreVein, false)
+    const vein = bfsCollect(block, (b) => matchIds.has(b.typeId), CONFIG.maxOreVein, CONFIG.search.mode)
     if (vein.length === 0) return
 
     system.runJob(oreVeinJob(
@@ -67,7 +67,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
   // tree
   const logId = stripNs(brokenId)
   if (LOG_SUFFIXES.has(logId) && tool?.hasTag("is_axe")) {
-    const logs = bfsCollect(block, (b) => b.typeId === brokenId, CONFIG.maxTreeLogs, true)
+    const logs = bfsCollect(block, (b) => b.typeId === brokenId, CONFIG.maxTreeLogs, CONFIG.search.mode)
     if (logs.length === 0) return
 
     system.runJob(treeJob(
@@ -83,7 +83,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
       if (LEAF_TYPES.has(stripNs(leafId))) {
         const combined = bfsCollect(
           block, (b) => b.typeId === brokenId || b.typeId === leafId,
-          CONFIG.maxTreeLogs + CONFIG.maxLeaves, true,
+          CONFIG.maxTreeLogs + CONFIG.maxLeaves, CONFIG.search.mode,
         )
 
         const leaves = combined.filter((b) => b.typeId === leafId)
@@ -128,7 +128,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
       block,
       isHarvestableCrop,
       CONFIG.maxCropChain,
-      false,
+      CONFIG.search.mode,
       (b) => isHarvestableCrop(b) || b.typeId.endsWith("_stem"),
     )
 
@@ -157,7 +157,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
       tool.getComponent(ItemComponentTypes.Enchantable)?.hasEnchantment("silk_touch") ||
       false
 
-    const leaves = bfsCollect(block, (b) => b.typeId === brokenId, CONFIG.maxLeaves, true)
+    const leaves = bfsCollect(block, (b) => b.typeId === brokenId, CONFIG.maxLeaves, CONFIG.search.mode)
     if (leaves && leaves.length === 0) return
 
     system.runJob(leafClearJob(

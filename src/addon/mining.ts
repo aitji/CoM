@@ -6,7 +6,7 @@ import {
   ItemComponentTypes, ItemStack,
   Player, Vector3
 } from "@minecraft/server"
-import { CropEntry, CROP_DATA, DropEntry, OreEntry } from "../core/config"
+import { CropEntry, CROP_DATA, DropEntry, OreEntry, SearchMode } from "../core/config"
 import { computeOreDrop, randInt, rollCropFortune, rollXP, durabilityCheck } from "./drops"
 import { applyMiningExhaustion } from "./hunger"
 
@@ -25,16 +25,30 @@ const DIRS_6: ReadonlyArray<readonly [number, number, number]> = [
   [1, 0, 0], [-1, 0, 0]
 ]
 
-const DIRS_26: ReadonlyArray<readonly [number, number, number]> = (() => {
+const buildDirs = (radius: number): ReadonlyArray<readonly [number, number, number]> => {
   const dirs: [number, number, number][] = []
-  for (let dx = -1; dx <= 1; dx++)
-    for (let dy = -1; dy <= 1; dy++)
-      for (let dz = -1; dz <= 1; dz++) {
+  for (let dx = -radius; dx <= radius; dx++)
+    for (let dy = -radius; dy <= radius; dy++)
+      for (let dz = -radius; dz <= radius; dz++) {
         if (dx === 0 && dy === 0 && dz === 0) continue
         dirs.push([dx, dy, dz])
       }
   return dirs
-})()
+}
+
+const DIRS_26 = buildDirs(1)
+const DIRS_AGGRESSIVE = buildDirs(2)
+
+const getSearchDirs = (mode: SearchMode): ReadonlyArray<readonly [number, number, number]> => {
+  switch (mode) {
+    case "aggressive":
+      return DIRS_AGGRESSIVE
+    case "around":
+      return DIRS_26
+    default:
+      return DIRS_6
+  }
+}
 
 const getNbr = (block: Block, dirs: ReadonlyArray<readonly [number, number, number]>): Block[] => {
   const result: Block[] = []
@@ -51,13 +65,13 @@ const getNbr = (block: Block, dirs: ReadonlyArray<readonly [number, number, numb
 
 export function bfsCollect(
   start: Block, predicate: (b: Block) => boolean,
-  maxBlocks: number, use26 = false,
+  maxBlocks: number, searchMode: SearchMode = "around",
   traversePredicate?: (b: Block) => boolean,
 ): Block[] {
   const found: Block[] = []
   const visited = new Set<string>([posKey(start)])
   const queue: Block[] = [start]
-  const dirs = use26 ? DIRS_26 : DIRS_6
+  const dirs = getSearchDirs(searchMode)
   let head = 0
   const canTraverse = traversePredicate ?? predicate
 
