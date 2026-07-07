@@ -42,6 +42,26 @@ const getNbr = (b: Block, d: readonly (readonly [number, number, number])[]) => 
     return r
 }
 
+function* spawnXP(d: Dimension, p: Vector3, xp: number, batchSize: number): Generator<void, number, void> {
+    let spawned = 0
+    if (xp <= 0) return spawned
+
+    for (let i = 0; i < xp; i++) {
+        try {
+            const entity = d.spawnEntity("minecraft:xp_orb", {
+                x: p.x + (Math.random() - 0.5) * 0.3,
+                y: p.y + 0.1,
+                z: p.z + (Math.random() - 0.5) * 0.3
+            })
+            if (entity) spawned++
+        } catch { }
+
+        if ((i + 1) % batchSize === 0) yield
+    }
+
+    return spawned
+}
+
 export function bfsCollect(s: Block, p: (b: Block) => boolean, m: number, m2: SearchMode = "around", t?: (b: Block) => boolean): Block[] {
     const f: Block[] = [], v = new Set([lib.posKey(s)]), q: Block[] = [s], d = getDir(m2)
     let h = 0, c = t ?? p
@@ -141,8 +161,14 @@ export function* oreVeinJob(bl: Block[], o: OreEntry, di: string, pl: Player, dp
         }
     } finally {
         if (!ctx.cr) {
-            ctx.dr.flush(bl[0]?.dimension ?? pl.dimension, dp)
-            if (xp > 0) pl.addExperience(xp)
+            const dim = bl[0]?.dimension ?? pl.dimension
+            ctx.dr.flush(dim, dp)
+            if (xp > 0) {
+                try {
+                    const spawned = yield* spawnXP(dim, dp, xp, Math.max(1, opt.blocksPerTick))
+                    if (spawned === 0) pl.addExperience(xp)
+                } catch { pl.addExperience(xp) }
+            }
             if (opt.costsHunger) exhaust(pl, ctx.br, opt.exhaustionPerBlock)
         }
     }
