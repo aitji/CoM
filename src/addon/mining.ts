@@ -19,7 +19,7 @@ class DropAccumulator {
     add = (i: string, a: number) => a > 0 && this.c.set(i, (this.c.get(i) ?? 0) + a)
     remove = (i: string, a = 1) => a <= 0 ? true : (this.c.get(i) ?? 0) >= a && (this.c.set(i, (this.c.get(i) ?? 0) - a), this.c.get(i) === 0 && this.c.delete(i), true)
     flush = (d: Dimension, p: Vector3) => {
-        if (cache.worldData.get(cache.WORLD_CACHE_ID)?.gamerule.doTileDrops === false) return
+        if (cache.getGameRule("doTileDrops") === false) return
         for (const [i, t] of this.c) {
             let r = t
             while (r > 0) {

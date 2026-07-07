@@ -35,7 +35,6 @@ export const world_init_update = () => {
     const gamerule = {} as WorldData['gamerule']
     for (const rule of worldGameRuleKeys) {
         const val = (world.gameRules as any)[rule]
-        world.sendMessage(`Game Rule ${rule} is set to ${val}`)
         gamerule[rule] = (typeof val === 'boolean' || typeof val === 'number') ? (val as boolean | number) : false
     }
     return update('world', WORLD_CACHE_ID, { gamerule })
@@ -43,7 +42,6 @@ export const world_init_update = () => {
 
 export const gamerule_update = (data: GameRuleChangeAfterEvent) => {
     if (!trackedGameRuleSet.has(data.rule)) return
-    world.sendMessage(`Game Rule ${data.rule} changed to ${data.value}`)
     return update('world', WORLD_CACHE_ID, { gamerule: { [data.rule as unknown as keyof WorldData['gamerule']]: data.value as any } })
 }
 
@@ -74,6 +72,12 @@ export const getPlayer = (player: Player | string, get?: CacheData) => {
         data = player_init_update(player)
     }
     return get ? data[get as CacheData] : data
+}
+
+export const getGameRule = (rule: TrackedGameRule): boolean | number | null => {
+    const data = worldData.get(WORLD_CACHE_ID)
+    if (!data) return null
+    return data.gamerule[rule]
 }
 
 export const getCachedDimension = (dimensionId: string): Dimension | null => {
