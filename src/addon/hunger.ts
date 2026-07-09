@@ -1,96 +1,66 @@
-import { Player, world } from "@minecraft/server"
-import type { EntityAttributeComponent } from "@minecraft/server"
-import { CONFIG } from "../core/config"
+import { Player } from "@minecraft/server"
+import * as lib from "../lib"
 
-// constant value ---
-const DYNAMIC_KEY = "com:exhaustion"
-const THRESHOLD = 4.0
-const HUNGER_ID = "minecraft:player.hunger"
-const SATURATION_ID = "minecraft:player.saturation"
-// constant value ---
-
-const exhaustionCache = new Map<string, number>()
-function getAttribute(player: Player, componentId: string): EntityAttributeComponent | undefined {
-  try {
-    const component = player.getComponent(componentId) as EntityAttributeComponent | undefined
-    return component
-  } catch (e) { return undefined }
-}
+const exhCache = new Map<string, number>()
+const configs = Object.freeze({
+    key: 'com:exhaustion' as const,
+    threshold: 4 as const
+} as const)
 
 function loadDyp(player: Player): number {
-  const cached = exhaustionCache.get(player.id)
-  if (cached !== undefined) return cached
+    const cache = exhCache.get(player.id)
+    if (cache !== undefined) return cache
 
-  let stored = 0
-  try {
-    const raw = player.getDynamicProperty(DYNAMIC_KEY)
-    if (typeof raw === "number") stored = raw
-  } catch { }
-
-  exhaustionCache.set(player.id, stored)
-  return stored
-}
-
-function persist(player: Player, value: number): void {
-  try { player.setDynamicProperty(DYNAMIC_KEY, value) }
-  catch { } // player left
-}
-
-function drainOnePoint(player: Player): void {
-  const saturation = getAttribute(player, SATURATION_ID)
-  if (saturation && saturation.currentValue > saturation.effectiveMin) {
+    let stored = 0
     try {
-      const oldValue = saturation.currentValue
-      const newValue = Math.max(saturation.effectiveMin, oldValue - 1)
-      saturation.setCurrentValue(newValue)
+        const raw = player.getDynamicProperty(configs.key)
+        if (typeof raw === "number") stored = raw
+    } catch { }
 
-      if (CONFIG.debug) console.log(`§e[HUNGER DEBUG]§r §b${player.name}§r: drained §qsaturation§r from §f${oldValue.toFixed(1)}§r to §f${newValue.toFixed(1)}§r§7 (min: ${saturation.effectiveMin})`)
-      return
-    } catch (e) { if (CONFIG.debug) console.error(`§c[HUNGER ERROR]§r drain saturation: ${e}`) }
-  }
-
-  const hunger = getAttribute(player, HUNGER_ID)
-  if (hunger && hunger.currentValue > hunger.effectiveMin) {
-    try {
-      const oldValue = hunger.currentValue
-      const newValue = Math.max(hunger.effectiveMin, oldValue - 1)
-      hunger.setCurrentValue(newValue)
-
-      if (CONFIG.debug) console.log(`§e[HUNGER DEBUG]§r §b${player.name}§r: drained §phunger§r from §f${oldValue.toFixed(1)}§r to §f${newValue.toFixed(1)}§r§7 (min: ${hunger.effectiveMin})`)
-    } catch (e) { if (CONFIG.debug) console.log(`§c[HUNGER ERROR]§r drain hunger: ${e}`) }
-  }
+    exhCache.set(player.id, stored)
+    return stored
 }
 
-export function applyMiningExhaustion(
-  player: Player,
-  blockCount: number,
-  exhaustionPerBlock: number,
-): void {
-  if (blockCount <= 0 || exhaustionPerBlock <= 0) return
+function drain(player: Player): void {
+    const saturation = lib.getAtt(player, "player.saturation")
 
-  const oldExhaustion = loadDyp(player)
-  let exhaustion = oldExhaustion + blockCount * exhaustionPerBlock
-  const hungerAttr = getAttribute(player, HUNGER_ID)
-  const saturationAttr = getAttribute(player, SATURATION_ID)
+    if (saturation && saturation.currentValue > saturation.effectiveMin) {
+        try {
+            const oldValue = saturation.currentValue
+            const newValue = Math.max(saturation.effectiveMin, oldValue - 1)
+            saturation.setCurrentValue(newValue)
+            return
+        } catch ($) { lib.log("HUNGER", `drain saturation: ${$}`, "error") }
+    }
 
-  if (CONFIG.debug) console.log(`§6[HUNGER]§r §b${player.name}§r mined §e${blockCount}§r block (§a${exhaustionPerBlock}§r per block), exhaustion: §c${oldExhaustion.toFixed(2)}§r -> §c${exhaustion.toFixed(2)}§r §7(threshold: ${THRESHOLD}) | hunger: §p${hungerAttr?.currentValue ?? "?"}§r§7 Saturation: §q${saturationAttr?.currentValue.toFixed(1) ?? "?"}§r`)
+    const hunger = lib.getAtt(player, "player.hunger")!
+    const { currentValue: val, effectiveMin: min } = hunger
+    if (hunger && val > min) {
+        try {
+            const vNew = Math.max(min, val - 1)
+            hunger.setCurrentValue(vNew)
 
-  let drainCount = 0
-  while (exhaustion >= THRESHOLD) {
-    exhaustion -= THRESHOLD
-    drainOnePoint(player)
-    drainCount++
-  }
-
-  if (drainCount > 0) {
-    if (CONFIG.debug) console.log(`§6[HUNGER]§r §b${player.name}§r drained §c${drainCount}§r point, remaining exhaustion §c${exhaustion.toFixed(2)}§r`)
-  } else {
-    const remainingToDrain = THRESHOLD - exhaustion
-    if (CONFIG.debug) console.log(`§6[HUNGER]§r §b${player.name}§r no drain yet. need §c${remainingToDrain.toFixed(2)}§r more exhaustion before next hunger point`)
-  }
-
-  exhaustionCache.set(player.id, exhaustion)
-  persist(player, exhaustion)
+            lib.log("HUNGER", `§b${lib.qName(player)}§r drained §phunger§r §f${val.toFixed(1)}->${vNew.toFixed(1)}`, "debug")
+        } catch ($) { lib.log("HUNGER", `drain hunger: ${$}`, "error") }
+    }
 }
 
-export const clearExhaustionCache = (playerId: string): boolean => exhaustionCache.delete(playerId)
+export function exhaust(player: Player, blockCount: number, exPb: number): void {
+    if (blockCount <= 0 || exPb <= 0) return
+
+    const oldExh = loadDyp(player)
+    let exh = oldExh + blockCount * exPb
+
+    let drainCount = 0
+    while (exh >= configs.threshold) {
+        exh -= configs.threshold
+        drain(player)
+        drainCount++
+    }
+
+    exhCache.set(player.id, exh)
+    player.setDynamicProperty(configs.key, exh)
+}
+
+export const hunger_track_stop = (playerId: string):
+    boolean | void => exhCache.delete(playerId)
