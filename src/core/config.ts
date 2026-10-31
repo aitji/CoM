@@ -101,7 +101,7 @@ function buildConfig(): Readonly<Config> {
             cropMode: cropDurabilityMode,
             oreVein: durabilityMode !== "none",
             treeFell: durabilityMode !== "none",
-            leafClear: durabilityMode !== "none",
+            leafClear: durabilityMode === "always",
         }),
         leafClear: Object.freeze({
             autoClearOnTreeFell: getBool("com:auto_leaf_clear", true),
