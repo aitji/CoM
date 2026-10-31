@@ -6,6 +6,8 @@ export type CropDurabilityMode = DurabilityMode
 export type SearchMode = "classic" | "around" | "aggressive"
 
 export type HungerMode = "none" | "vanilla" | "exhaustion"
+export type LeafClearMode = "decay" | "instant"
+export const LEAF_DECAY_RANGE = 6
 
 export interface Config {
     debug: boolean
@@ -15,6 +17,7 @@ export interface Config {
     maxOreVein: number
     maxTreeLogs: number
     maxLeaves: number
+    maxTreeLeaves: number
     maxCropChain: number
     performance: { blocksPerTick: number }
     search: { mode: SearchMode }
@@ -25,7 +28,7 @@ export interface Config {
         treeFell: boolean
         leafClear: boolean
     }
-    leafClear: { autoClearOnTreeFell: boolean }
+    leafClear: { autoClearOnTreeFell: boolean; mode: LeafClearMode }
     hunger: {
         mode: HungerMode
         exhaustionPerBlock: number
@@ -60,7 +63,10 @@ function getStr(name: string, fallback: string): string {
 function getInt(name: string, fallback: number): number {
     const raw = packSettings[name]
     if (typeof raw === "number") return raw
-    if (typeof raw === "string") return Number(raw) ?? fallback
+    if (typeof raw === "string") {
+        const n = Number(raw)
+        return raw.trim() !== "" && Number.isFinite(n) ? n : fallback
+    }
 
     return fallback
 }
@@ -80,8 +86,9 @@ function buildConfig(): Readonly<Config> {
         requireSneak: getBool("com:require_sneak", true),
         debug: getBool("com:debug", false),
         maxOreVein: getInt("com:ore_limit", 32),
-        maxTreeLogs: getInt("com:tree_limit", 256),
+        maxTreeLogs: getInt("com:tree_limit", 512),
         maxLeaves: getInt("com:leaf_limit", 128),
+        maxTreeLeaves: getInt("com:tree_leaf_limit", 1024),
         maxCropChain: getInt("com:crop_limit", 64),
         performance: Object.freeze({
             blocksPerTick: getInt("com:performance", 8)
@@ -97,7 +104,8 @@ function buildConfig(): Readonly<Config> {
             leafClear: durabilityMode !== "none",
         }),
         leafClear: Object.freeze({
-            autoClearOnTreeFell: getBool("com:auto_leaf_clear", false)
+            autoClearOnTreeFell: getBool("com:auto_leaf_clear", true),
+            mode: (getBool("com:auto_leaf_clear", true) ? "instant" : "decay") as LeafClearMode
         }),
         hunger: Object.freeze({
             mode: getStr("com:hunger_mode", "exhaustion") as HungerMode,
@@ -164,8 +172,24 @@ export const ORE_DATA: ReadonlyMap<string, OreEntry> = new Map([
 export const LEAF_TYPES: ReadonlySet<string> = new Set([
     "oak_leaves", "spruce_leaves", "birch_leaves", "jungle_leaves",
     "acacia_leaves", "dark_oak_leaves", "mangrove_leaves", "cherry_leaves",
-    "azalea_leaves", "flowering_azalea_leaves", "pale_oak_leaves",
+    "azalea_leaves", "azalea_leaves_flowered", "pale_oak_leaves",
+    "orange_poplar_leaves", "red_poplar_leaves", "yellow_poplar_leaves",
 
+    "crimson_stem", "warped_stem", "crimson_hyphae", "warped_hyphae",
+    "stripped_crimson_stem", "stripped_warped_stem", "stripped_crimson_hyphae", "stripped_warped_hyphae",
+    "nether_wart_block", "warped_wart_block"
+])
+
+export const SAPLING_OVERRIDE: ReadonlyMap<string, string> = new Map([
+    ["orange_poplar_leaves", "minecraft:poplar_sapling"],
+    ["red_poplar_leaves", "minecraft:poplar_sapling"],
+    ["yellow_poplar_leaves", "minecraft:poplar_sapling"],
+    ["azalea_leaves", "minecraft:azalea"],
+    ["azalea_leaves_flowered", "minecraft:flowering_azalea"],
+    ["mangrove_leaves", "minecraft:mangrove_propagule"],
+])
+
+export const NETHER_WOOD: ReadonlySet<string> = new Set([
     "crimson_stem", "warped_stem", "crimson_hyphae", "warped_hyphae",
     "stripped_crimson_stem", "stripped_warped_stem", "stripped_crimson_hyphae", "stripped_warped_hyphae",
     "nether_wart_block", "warped_wart_block"
@@ -176,24 +200,24 @@ export const LOG_SUFFIXES: ReadonlySet<string> = new Set([
     // log
     "oak_log", "spruce_log", "birch_log", "jungle_log", "acacia_log",
     "dark_oak_log", "mangrove_log", "cherry_log", "pale_oak_log",
-    "crimson_stem", "warped_stem",
+    "crimson_stem", "warped_stem", "poplar_log",
 
     // wood
     "oak_wood", "spruce_wood", "birch_wood", "jungle_wood", "acacia_wood",
     "dark_oak_wood", "mangrove_wood", "cherry_wood", "pale_oak_wood",
-    "crimson_hyphae", "warped_hyphae",
+    "crimson_hyphae", "warped_hyphae", "poplar_wood",
 
     // stripped logs
     "stripped_oak_log", "stripped_spruce_log", "stripped_birch_log",
     "stripped_jungle_log", "stripped_acacia_log", "stripped_dark_oak_log",
     "stripped_mangrove_log", "stripped_cherry_log", "stripped_pale_oak_log",
-    "stripped_crimson_stem", "stripped_warped_stem",
+    "stripped_crimson_stem", "stripped_warped_stem", "stripped_poplar_log",
 
-    // Stripped woods
+    // stripped woods
     "stripped_oak_wood", "stripped_spruce_wood", "stripped_birch_wood",
     "stripped_jungle_wood", "stripped_acacia_wood", "stripped_dark_oak_wood",
     "stripped_mangrove_wood", "stripped_cherry_wood", "stripped_pale_oak_wood",
-    "stripped_crimson_hyphae", "stripped_warped_hyphae"
+    "stripped_crimson_hyphae", "stripped_warped_hyphae", "stripped_poplar_log"
 ])
 
 // crop data

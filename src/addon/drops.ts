@@ -1,5 +1,5 @@
 // confusing math stuff
-import { OreEntry, FortuneMode } from "../core/config"
+import { OreEntry, FortuneMode, SAPLING_OVERRIDE } from "../core/config"
 
 // random
 export const randInt = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1)) + min
@@ -26,6 +26,9 @@ export function rollCropFortune(min: number, max: number, fortune: number, cap?:
     const bonus = Math.max(0, Math.floor(Math.random() * (fortune + 2)) - 1)
     return Math.min(Math.max(min, max + bonus), cap ?? Infinity)
 }
+
+export const leafSapling = (leafId: string): string =>
+    SAPLING_OVERRIDE.get(leafId) ?? `minecraft:${leafId.replace("_leaves", "_sapling")}`
 
 export const rollXP = (xp: [number, number]): number => randInt(xp[0], xp[1])
 export const durabilityCheck = (unbreakingLevel: number): boolean => unbreakingLevel === 0 || Math.random() < 1 / (unbreakingLevel + 1)

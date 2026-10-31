@@ -1,6 +1,6 @@
 import { Block, Dimension, ItemStack, Player, Vector3, EquipmentSlot, ItemComponentTypes, EntityComponentTypes, world } from "@minecraft/server"
-import { CropEntry, CROP_DATA, OreEntry, SearchMode, dirs } from "../core/config"
-import { computeOreDrop, rollCropFortune, rollXP, durabilityCheck } from "./drops"
+import { CropEntry, CROP_DATA, NETHER_WOOD, OreEntry, SearchMode, dirs } from "../core/config"
+import { computeOreDrop, rollCropFortune, rollXP, durabilityCheck, leafSapling } from "./drops"
 import { exhaust } from "./hunger"
 import * as lib from "../lib"
 import * as cache from "../core/cache"
@@ -33,7 +33,7 @@ class DropAccumulator {
 
 // helpers
 const getDir = (m: SearchMode) => m === "aggressive" ? DIR_124 : m === "around" ? DIR_26 : DIR_6
-const getNbr = (b: Block, d: readonly (readonly [number, number, number])[]) => {
+export const getNbr = (b: Block, d: readonly (readonly [number, number, number])[]) => {
     const r: Block[] = [], { x, y, z } = b, dim = b.dimension
     for (const [dx, dy, dz] of d) try {
         const nb = dim.getBlock({ x: x + dx, y: y + dy, z: z + dz })
@@ -130,11 +130,7 @@ const applyDur = (pl: Player, u: number): boolean => {
     if (!to) return false
     const d = to.getComponent(ItemComponentTypes.Durability)
     if (!d) return true
-    if (d.damage >= d.maxDurability - 1) {
-        lib.getEqu(pl)?.setEquipment(EquipmentSlot.Mainhand, new ItemStack("minecraft:air"))
-        try { pl.playSound('random.break', { location: pl.location }) } catch { }
-        return false
-    }
+    if (d.damage >= d.maxDurability - 1) return false
     if (durabilityCheck(u)) {
         d.damage++
         lib.getEqu(pl)?.setEquipment(EquipmentSlot.Mainhand, to)
@@ -147,6 +143,7 @@ export function* oreVeinJob(bl: Block[], o: OreEntry, di: string, pl: Player, dp
     let xp = 0
     try {
         for (const b of bl) {
+            if (opt.costsDurability && !applyDur(pl, ctx.en.unbreaking)) break
             if (!ctx.cr) {
                 if (ctx.en.silkTouch && o.silkTouch) ctx.dr.add(b.typeId, 1)
                 else {
@@ -156,7 +153,6 @@ export function* oreVeinJob(bl: Block[], o: OreEntry, di: string, pl: Player, dp
             }
             try { b.setType("minecraft:air") } catch { continue }
             ctx.br++
-            if (opt.costsDurability && !applyDur(pl, ctx.en.unbreaking)) break
             if (ctx.br % opt.blocksPerTick === 0) yield
         }
     } finally {
@@ -181,6 +177,7 @@ export function* cropHarvestJob(bl: Block[], cr: CropEntry, pl: Player, dp: Vect
         for (const b of hb) {
             const cc = CROP_DATA.get(lib.stripNs(b.typeId))
             if (!cc) continue
+            if (opt.costsDurability && !applyDur(pl, ctx.en.unbreaking)) break
             const sp = cc.canReplace && cc.maturity !== "none" ? (() => { try { return b.permutation.withState(cc.maturity, 0) } catch { return undefined } })() : undefined
             if (!ctx.cr) {
                 if (ctx.en.silkTouch && cr.silkTouch) ctx.dr.add(b.typeId, 1)
@@ -191,7 +188,6 @@ export function* cropHarvestJob(bl: Block[], cr: CropEntry, pl: Player, dp: Vect
             try { b.setType("minecraft:air") } catch { continue }
             if (sr && sp) try { b.setPermutation(sp) } catch { }
             ctx.br++
-            if (opt.costsDurability && !applyDur(pl, ctx.en.unbreaking)) break
             if (ctx.br % opt.blocksPerTick === 0) yield
         }
     } finally {
@@ -206,10 +202,10 @@ export function* treeJob(l: Block[], pl: Player, dp: Vector3, opt: JobOptions): 
     const ctx = mkCtx(pl)
     try {
         for (const b of l) {
+            if (opt.costsDurability && !applyDur(pl, ctx.en.unbreaking)) break
             if (!ctx.cr) ctx.dr.add(b.typeId, 1)
             try { b.setType("minecraft:air") } catch { continue }
             ctx.br++
-            if (opt.costsDurability && !applyDur(pl, ctx.en.unbreaking)) break
             if (ctx.br % opt.blocksPerTick === 0) yield
         }
     } finally {
@@ -224,18 +220,19 @@ export function* leafClearJob(l: Block[], pl: Player, us: boolean, dp: Vector3, 
     const ctx = mkCtx(pl)
     try {
         for (const b of l) {
+            if (opt.costsDurability && !applyDur(pl, ctx.en.unbreaking)) break
             if (!ctx.cr) {
-                if (us) ctx.dr.add(b.typeId, 1)
+                const li = lib.stripNs(b.typeId)
+                if (us || NETHER_WOOD.has(li)) ctx.dr.add(b.typeId, 1)
                 else {
-                    const li = lib.stripNs(b.typeId), jl = li.startsWith("jungle")
-                    if (Math.random() < (jl ? 0.025 : 0.05)) ctx.dr.add(`minecraft:${li.replace("_leaves", "_sapling")}`, 1)
+                    const jl = li.startsWith("jungle")
+                    if (Math.random() < (jl ? 0.025 : 0.05)) ctx.dr.add(leafSapling(li), 1)
                     if (Math.random() < 0.02) ctx.dr.add("minecraft:stick", 1)
                     if ((li === "oak_leaves" || li === "dark_oak_leaves") && Math.random() < 0.005) ctx.dr.add("minecraft:apple", 1)
                 }
             }
             try { b.setType("minecraft:air") } catch { continue }
             ctx.br++
-            if (opt.costsDurability && !applyDur(pl, ctx.en.unbreaking)) break
             if (ctx.br % opt.blocksPerTick === 0) yield
         }
     } finally {

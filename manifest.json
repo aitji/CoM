@@ -161,7 +161,7 @@
             "type": "toggle",
             "text": "§fAutomatically clear leaves §7after felling trees §c(May reduce performance)",
             "name": "com:auto_leaf_clear",
-            "default": false
+            "default": true
         },
 
 
