@@ -1,6 +1,7 @@
 import { Block, Player, system, Vector3 } from "@minecraft/server"
 import { CONFIG, CROP_DATA, LEAF_TYPES, LOG_SUFFIXES, ORE_DATA, PICKAXE_TIERS } from "../core/config"
 import { bfsCollect, cropHarvestJob, leafClearJob, oreVeinJob, treeJob } from "../addon/mining"
+import { leafAfterFellJob } from "../addon/decay"
 import * as lib from "../lib"
 // ore, tree, crop & leaves (in order)
 
@@ -32,18 +33,16 @@ export const handleTree = (block: Block, brokenId: string, tool: any, player: an
 
     const logs = bfsCollect(block, (b) => b.typeId === brokenId, CONFIG.maxTreeLogs, CONFIG.search.mode)
     if (logs.length === 0) return false
+    if (logs.length >= CONFIG.maxTreeLogs) lib.log("TREE", `hit tree_limit (${CONFIG.maxTreeLogs}), part of the tree is left standing`, "debug")
 
     system.runJob(treeJob(logs, player, dropPos, lib.buildOpt(CONFIG.durability.treeFell, CONFIG.hunger.treeFell)))
 
     if (CONFIG.leafClear.autoClearOnTreeFell) {
-        const leafId = `minecraft:${lib.qLogId(logId)}_leaves`
-        if (LEAF_TYPES.has(lib.stripNs(leafId))) {
-            const combined = bfsCollect(block, (b) => b.typeId === brokenId || b.typeId === leafId, CONFIG.maxTreeLogs + CONFIG.maxLeaves, CONFIG.search.mode)
-            const leaves = combined.filter((b) => b.typeId === leafId)
-            if (leaves.length > 0) {
-                system.runJob(leafClearJob(leaves, player, false, dropPos, lib.buildOpt(CONFIG.durability.leafClear, CONFIG.hunger.leafClear)))
-            }
-        }
+        system.runJob(leafAfterFellJob(
+            [block, ...logs], player, dropPos,
+            lib.buildOpt(CONFIG.durability.leafClear, CONFIG.hunger.leafClear),
+            CONFIG.leafClear.mode, CONFIG.maxTreeLeaves
+        ))
     }
     return true
 }
