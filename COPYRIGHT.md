@@ -26,7 +26,7 @@ In plain terms:
 
 The [CoM Noncommercial License](./LICENSE) **does not** apply to the following materials unless explicitly stated otherwise:
 
-- **CoM™** and **Chain of Mining™** names, trademarks, and branding
+- **CoM™**, **Chain of Mining™** and **Chain o' Mining™** names, trademarks, and branding
 - Project logo, icons, and visual identity assets
 - Screenshots, GIFs, promotional images, icon, banners, and artwork
 - Release notes and changelog entries
@@ -60,7 +60,7 @@ Attribution is **required** for all noncommercial redistribution, forks, and der
 
 Attribution must include:
 
-1. **Project name:** CoM / Chain of Mining
+1. **Project name:** CoM, Chain of Mining / Chain o' Mining
 2. **Authors:** [@aitji](https://github.com/aitji) & [@pickerth-12](https://github.com/pickerth-12)
 3. **Source link:** [CurseForge](https://www.curseforge.com/minecraft-bedrock/addons/chain-of-mining), [MCPEDL](https://mcpedl.com/chain-of-mining) & [GitHub](https://github.com/aitji/CoM)
 4. **License reference:** [CoM Noncommercial License 1.0](./LICENSE)
@@ -69,7 +69,7 @@ Failure to provide proper attribution, or removal of the Required Notice, ends t
 
 ## Trademark & Branding
 
-**CoM™** and **Chain of Mining™** are project identifiers used to distinguish the official release.
+**CoM™**, **Chain of Mining™** and **Chain o' Mining™** are project identifiers used to distinguish the official release.
 
 Use of these names, logos, or branding in any manner that suggests official affiliation, endorsement, ownership, or authorship by parties other than the original authors is **prohibited**.
 
